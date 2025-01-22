@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube MP3 下載器</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .loading {
+            display: none;
+        }
+        .loading.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center mb-8">YouTube MP3 下載器</h1>
+
+        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+            <div class="bg-blue-50 rounded-lg p-4 mb-6">
+                <h2 class="text-lg font-semibold text-blue-800 mb-2">功能特點</h2>
+                <ul class="text-blue-700 text-sm space-y-2">
+                    <li>✨ 支援單一影片下載 - 只需貼上 YouTube 影片連結</li>
+                    <li>📑 支援播放清單批量下載 - 一次下載整個播放清單</li>
+                    <li>🎵 自動轉換為高品質 MP3 格式</li>
+                    <li>📦 播放清單自動打包為 ZIP 檔案</li>
+                </ul>
+            </div>
+            <div class="text-sm text-gray-500 mb-8">
+                <p>使用方式：將 YouTube 影片或播放清單的網址貼到下方輸入框，然後點擊「開始下載」即可</p>
+            </div>
+            <form id="downloadForm" class="space-y-4">
+                <div>
+                    <label for="url" class="block text-sm font-medium text-gray-700">YouTube 網址</label>
+                    <input type="url" id="url" name="url" required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
+                
+                <!-- <div>
+                    <label class="block text-sm font-medium text-gray-700">下載類型</label>
+                    <div class="mt-2 space-x-4">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="type" value="single" checked
+                                class="form-radio text-indigo-600">
+                            <span class="ml-2">單一影片</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="type" value="playlist"
+                                class="form-radio text-indigo-600">
+                            <span class="ml-2">播放清單</span>
+                        </label>
+                    </div>
+                </div> -->
+                
+                <button type="submit"
+                    class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                    開始下載
+                </button>
+            </form>
+            
+            <div id="loading" class="loading mt-4">
+                <div class="relative pt-1">
+                    <div class="flex mb-2 items-center justify-between">
+                        <div>
+                            <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-indigo-600 bg-indigo-200">
+                                下載中
+                            </span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs font-semibold inline-block text-indigo-600" id="progress-percentage">
+                                0%
+                            </span>
+                        </div>
+                    </div>
+                    <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-indigo-200">
+                        <div id="progress-bar" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-indigo-600" style="width: 0%">
+                        </div>
+                    </div>
+                    <div id="progress-info" class="text-sm text-gray-600 text-center"></div>
+                </div>
+            </div>
+            
+            <div id="result" class="mt-4 p-4 rounded-md hidden">
+                <!-- 結果將在這裡顯示 -->
+            </div>
+
+            <!-- 新增下載按鈕區域 -->
+            <div id="download-section" class="mt-4 text-center hidden">
+                <a id="download-button" href="#" 
+                   class="inline-block bg-green-600 text-white py-2 px-6 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                    下載檔案
+                </a>
+        </div>
+    </div>
+    </div>
+
+<!-- 修改 script 部分 -->
+<script>
+    let progressInterval;
+
+    function formatSpeed(speed) {
+        if (!speed) return '0 MB/s';
+        return `${(speed / 1024 / 1024).toFixed(2)} MB/s`;
+    }
+
+    function formatTime(seconds) {
+        if (!seconds) return '計算中...';
+        const minutes = Math.floor(seconds / 60);
+        seconds = seconds % 60;
+        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    async function updateProgress() {
+        try {
+            const response = await fetch('/progress');
+            const data = await response.json();
+            
+            if (data.status === 'downloading') {
+                const progressBar = document.getElementById('progress-bar');
+                const progressPercentage = document.getElementById('progress-percentage');
+                const progressInfo = document.getElementById('progress-info');
+                
+                progressBar.style.width = `${data.percentage}%`;
+                progressPercentage.textContent = `${data.percentage}%`;
+                progressInfo.textContent = `速度: ${formatSpeed(data.speed)} | 剩餘時間: ${formatTime(data.eta)}`;
+            }
+        } catch (error) {
+            console.error('Error fetching progress:', error);
+        }
+    }
+
+    document.getElementById('downloadForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const form = e.target;
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+        const downloadSection = document.getElementById('download-section');
+        const downloadButton = document.getElementById('download-button');
+        
+        // 重置進度條
+        document.getElementById('progress-bar').style.width = '0%';
+        document.getElementById('progress-percentage').textContent = '0%';
+        document.getElementById('progress-info').textContent = '';
+        
+        // 隱藏下載按鈕和重置結果
+        downloadSection.classList.add('hidden');
+        loading.classList.add('active');
+        result.classList.add('hidden');
+        
+        // 開始定期更新進度
+        progressInterval = setInterval(updateProgress, 3000);
+        
+        try {
+            const response = await fetch('/download', {
+                method: 'POST',
+                body: new FormData(form)
+            });
+            
+            const data = await response.json();
+            
+            // 停止更新進度
+            clearInterval(progressInterval);
+            
+            // 顯示結果
+            result.classList.remove('hidden');
+            if (data.status === 'success') {
+                result.innerHTML = `
+                    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4">
+                        <p>${data.type === 'playlist' 
+                            ? `成功下載播放清單！共 ${data.count} 個影片` 
+                            : `成功下載：${data.title}`}</p>
+                    </div>`;
+                
+                // 設置下載連結並顯示下載按鈕
+                downloadButton.href = data.download_url;
+                downloadSection.classList.remove('hidden');
+            } else {
+                result.innerHTML = `
+                    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4">
+                        <p>錯誤：${data.message}</p>
+                    </div>`;
+            }
+        } catch (error) {
+            clearInterval(progressInterval);
+            result.classList.remove('hidden');
+            result.innerHTML = `
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4">
+                    <p>發生錯誤：${error.message}</p>
+                </div>`;
+        } finally {
+            loading.classList.remove('active');
+        }
+    });
+</script>
+</body>
+</html>
