@@ -1,0 +1,24 @@
+{
+    "version": 2,
+    "builds": [
+      {
+        "src": "run.py",
+        "use": "@vercel/python",
+        "config": { 
+          "runtime": "python3.9",
+          "maxDuration": 60,
+          "memory": 1024
+        }
+      }
+    ],
+    "routes": [
+      {
+        "src": "/(.*)",
+        "dest": "run.py"
+      }
+    ],
+    "env": {
+      "VERCEL": "1",
+      "PYTHONUNBUFFERED": "1"
+    }
+}
