@@ -1,0 +1,14 @@
+# Web Framework
+Flask==3.0.0
+
+# YouTube 下載
+yt-dlp==2023.12.30
+
+# 音頻處理
+mutagen==1.47.0
+
+# HTTP 請求
+requests==2.31.0
+
+# 其他依賴
+urllib3==2.1.0
