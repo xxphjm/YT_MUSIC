@@ -11,6 +11,16 @@
         "src": "/(.*)",
         "dest": "run.py"
       }
-    ]
+  ],
+  "env": {
+    "PYTHONPATH": ".",
+    "FFMPEG_BINARY": "/tmp/ffmpeg"
+  },
+  "functions": {
+    "api/*.py": {
+      "memory": 1024,
+      "maxDuration": 300,
+      "runtime": "edge"
+    }
   }
-  
+}
