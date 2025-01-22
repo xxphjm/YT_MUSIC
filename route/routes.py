@@ -12,9 +12,8 @@ def index():
 
 @bp.route('/download', methods=['POST'])
 def download():
+    
     url = request.form.get('url')
-    download_type = request.form.get('type', 'single')
-
     if not url or not is_valid_youtube_url(url):
         return jsonify({'status': 'error', 'message': '無效的 YouTube URL'})
     url_info=parse_youtube_url(url)
