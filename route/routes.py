@@ -28,8 +28,6 @@ def download():
         result = download_single_video(video_url, current_app.config['UPLOAD_FOLDER'])
 
     if result['status'] == 'success':
-        # 提供檔案下載路徑
-        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], result['filename'])
         return jsonify({
             'status': 'success',
             'title': result['title'],
