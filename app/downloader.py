@@ -205,8 +205,10 @@ def download_playlist(url, output_dir):
         'http_headers': {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Accept': '*/*',
-            'Accept-Encoding': 'identity',
-            'Connection': 'close',
+            'Accept-Language': 'en-us,en;q=0.5',
+            'Sec-Fetch-Mode': 'navigate',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
         },
         'nocheckcertificate': True,
         'no_check_certificate': True,
@@ -214,6 +216,12 @@ def download_playlist(url, output_dir):
         'quiet': False,
         'no_warnings': False,
         'verbose': True,
+        'extract_flat': True,  # 扁平化提取
+        'no_color': True,  # 禁用顏色輸出
+        'socket_timeout': 30,  # 增加超時時間
+        'geo_bypass': True,  # 繞過地理限制
+        'geo_bypass_country': 'US',  # 使用美國 IP
+        'extractor_retries': 5,  # 提取器重試次數
     }
 
     try:
