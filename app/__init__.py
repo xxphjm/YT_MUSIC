@@ -26,7 +26,9 @@ def create_app():
     app = Flask(__name__, template_folder=template_dir)
     
     # 修改：使用 /tmp 目錄而不是專案目錄
-    app.config['UPLOAD_FOLDER'] = os.path.join(base_dir, 'tmp/downloads')
+    app.config['UPLOAD_FOLDER'] = '/tmp/downloads'
+    #本地使用
+    # app.config['UPLOAD_FOLDER'] = os.path.join(base_dir, 'tmp/downloads')
     # 確保下載目錄存在
     if not os.path.exists(app.config['UPLOAD_FOLDER']):
         os.makedirs(app.config['UPLOAD_FOLDER'])
