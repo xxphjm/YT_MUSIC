@@ -5,6 +5,7 @@ from mutagen.id3 import ID3, TIT2, TPE1, TALB, APIC
 from utils import normalize_filename
 from flask import current_app
 import json
+from fake_useragent import UserAgent
 
 
 
@@ -38,6 +39,7 @@ def progress_hook(d):
 
 
 def download_single_video(url, output_dir):
+    ua = UserAgent()
     ydl_opts = {
         'format': 'bestaudio/best',
         'postprocessors': [{
@@ -50,7 +52,7 @@ def download_single_video(url, output_dir):
         'progress_hooks': [progress_hook],
         # 修改下載配置
         'http_headers': {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'User-Agent': ua.edge,
             'Accept': '*/*',
             'Accept-Encoding': 'gzip, deflate, br',
             'Connection': 'keep-alive',
@@ -156,6 +158,7 @@ def download_playlist(url, output_dir):
     }
 
     def playlist_hook(d):
+        
         """播放清單專用的進度回調"""
         print(f"Playlist hook status: {d['status']}")  # 調試信息
         
@@ -191,6 +194,7 @@ def download_playlist(url, output_dir):
             # 當前檔案下載完成，增加計數
             playlist_info['downloaded_items'] += 1
             print(f"Finished item {playlist_info['downloaded_items']} of {playlist_info['total_items']}")  # 調試信息
+    ua = UserAgent()
     ydl_opts = {
         'format': 'bestaudio/best',
         'postprocessors': [{
@@ -202,7 +206,7 @@ def download_playlist(url, output_dir):
         'writethumbnail': True,
         'progress_hooks': [playlist_hook],
         'http_headers': {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'User-Agent': ua.edge,
             'Accept': '*/*',
             'Accept-Encoding': 'gzip, deflate, br',
             'Connection': 'keep-alive',
