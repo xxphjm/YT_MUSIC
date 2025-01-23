@@ -13,3 +13,5 @@ requests==2.31.0
 
 # 其他依賴
 urllib3==2.1.0
+
+fake_useragent==2.0.3
