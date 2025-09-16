@@ -80,6 +80,14 @@ def download_single_video(url, output_dir):
                 json.dump({'status': 'starting', 'percentage': 0}, f)
             # 先獲取信息
             info = ydl.extract_info(url, download=False)
+            if not info:
+                # 如果 info 是 None，記錄錯誤並提前返回
+                error_message = f"無法從 URL 獲取影片資訊: {url}。影片可能不存在、受限制或網路問題。"
+                print(error_message)
+                # 也可以將錯誤寫入 progress.json
+                with open(os.path.join(current_app.config['UPLOAD_FOLDER'], 'progress.json'), 'w') as f:
+                    json.dump({'status': 'error', 'message': error_message}, f)
+                return {'status': 'error', 'message': error_message}
             title = info['title']
             normalized_title = normalize_filename(title)
             safe_title = normalize_filename(title)
@@ -236,8 +244,16 @@ def download_playlist(url, output_dir):
             print("Extracting playlist info...")
             result = ydl.extract_info(url, download=False)
             
-            if 'entries' not in result:
-                raise Exception("無效的播放清單")
+            # --- 新增的防禦性檢查 ---
+            if not result or 'entries' not in result:
+                # 如果 result 是 None，或者裡面沒有 'entries' 鍵
+                error_message = "無效的播放清單 URL 或無法獲取其內容。"
+                print(error_message)
+                # 更新進度文件以反映錯誤
+                progress_file = os.path.join(current_app.config['UPLOAD_FOLDER'], 'progress.json')
+                with open(progress_file, 'w') as f:
+                    json.dump({'status': 'error', 'message': error_message}, f)
+                return {'status': 'error', 'message': error_message}
             playlist_title = normalize_filename(result['title'])
             # 更新 ydl_opts 中的輸出模板，確保使用相同的目錄名
             ydl_opts['outtmpl'] = os.path.join(output_dir, playlist_title, '%(title)s.%(ext)s')
