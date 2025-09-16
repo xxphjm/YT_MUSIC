@@ -40,6 +40,7 @@ def progress_hook(d):
 
 def download_single_video(url, output_dir):
     ua = UserAgent()
+    realagent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
     source_cookie_path = os.path.join(current_app.config['template_folder'], 'cookies.txt')
     tmp_cookie_path = os.path.join('/tmp', 'cookies.txt')
     if os.path.exists(source_cookie_path):
@@ -58,7 +59,7 @@ def download_single_video(url, output_dir):
         'progress_hooks': [progress_hook],
         # 修改下載配置
         'http_headers': {
-            'User-Agent': ua.edge,
+            'User-Agent': realagent,
             'Accept': '*/*',
             'Accept-Encoding': 'gzip, deflate, br',
             'Connection': 'keep-alive',
