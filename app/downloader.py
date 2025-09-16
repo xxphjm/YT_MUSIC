@@ -40,8 +40,13 @@ def progress_hook(d):
 
 def download_single_video(url, output_dir):
     ua = UserAgent()
+    source_cookie_path = os.path.join(current_app.config['template_folder'], 'cookies.txt')
+    tmp_cookie_path = os.path.join('/tmp', 'cookies.txt')
+    if os.path.exists(source_cookie_path):
+        import shutil
+        shutil.copy2(source_cookie_path, tmp_cookie_path)
     ydl_opts = {
-        "cookiefile": os.path.join(current_app.config['template_folder'], 'cookies.txt'),
+        "cookiefile":tmp_cookie_path,
         'format': 'bestaudio/best',
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
