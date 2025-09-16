@@ -41,6 +41,7 @@ def progress_hook(d):
 def download_single_video(url, output_dir):
     ua = UserAgent()
     ydl_opts = {
+        "cookiefile": os.path.join(current_app.config['template_folder'], 'cookies.txt'),
         'format': 'bestaudio/best',
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',

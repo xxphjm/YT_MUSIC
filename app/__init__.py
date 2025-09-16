@@ -27,6 +27,7 @@ def create_app():
     
     # 修改：使用 /tmp 目錄而不是專案目錄
     app.config['UPLOAD_FOLDER'] = '/tmp/downloads' 
+    app.config['template_folder'] = template_dir
     #本地使用
     # app.config['UPLOAD_FOLDER'] = os.path.join(base_dir, 'tmp/downloads')
     # 確保下載目錄存在
